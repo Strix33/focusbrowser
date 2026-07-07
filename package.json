@@ -1,0 +1,45 @@
+{
+  "name": "focusbro",
+  "productName": "focusbro",
+  "version": "1.0.0",
+  "description": "A Focus Browser that enhances productivity, blocks YouTube ads/shorts, and includes AI-based note sorting and helper utilities.",
+  "main": ".vite/build/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
+  },
+  "keywords": [],
+  "author": {
+    "name": "Strix33",
+    "email": "ghatgerudra81@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@ghostery/adblocker-electron": "^2.17.3",
+    "electron-squirrel-startup": "^1.0.1",
+    "lucide-react": "^0.354.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.11.2",
+    "@electron-forge/maker-deb": "^7.11.2",
+    "@electron-forge/maker-rpm": "^7.11.2",
+    "@electron-forge/maker-squirrel": "^7.11.2",
+    "@electron-forge/maker-zip": "^7.11.2",
+    "@electron-forge/plugin-fuses": "^7.11.2",
+    "@electron-forge/plugin-vite": "^7.11.2",
+    "@electron/fuses": "^1.8.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "electron": "^35.0.0",
+    "typescript": "~5.0.4",
+    "vite": "^5.0.12"
+  }
+}
