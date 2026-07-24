@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Trophy, Shield, Flame, Zap, Award, CheckCircle2, Lock, Plus, RotateCcw, Activity } from 'lucide-react';
-import { RANK_TIERS, getRankProgressInfo, formatStudyTime, RankTier } from '../utils/rank-system';
+import { Trophy, Flame, Award, Activity } from 'lucide-react';
+import { getRankProgressInfo, formatStudyTime } from '../utils/rank-system';
 import { ClassificationResult } from '../utils/content-classifier';
 
 interface RankTabProps {
@@ -12,9 +12,7 @@ interface RankTabProps {
 
 export default function RankTab({
   totalStudySeconds,
-  onUpdateStudySeconds,
   currentClassification,
-  currentTitle
 }: RankTabProps) {
   const hours = totalStudySeconds / 3600;
   const progressInfo = getRankProgressInfo(hours);
@@ -41,15 +39,6 @@ export default function RankTab({
       videoRef.current.play().catch(err => console.log('[FocusBro] Video autoplay issue:', err));
     }
   }, [videoUrl]);
-
-  const handleAddHours = (addHours: number) => {
-    const newSeconds = Math.max(0, totalStudySeconds + addHours * 3600);
-    onUpdateStudySeconds(newSeconds);
-  };
-
-  const handleReset = () => {
-    onUpdateStudySeconds(0);
-  };
 
   return (
     <div className="rank-tab-container">
@@ -159,58 +148,6 @@ export default function RankTab({
               )}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Dev / Testing Controls */}
-      <div className="rank-dev-controls">
-        <span className="dev-label">⚡ Fast Testing / Demo Controls:</span>
-        <button onClick={() => handleAddHours(1)} className="btn-dev">
-          <Plus size={13} /> +1 Hr
-        </button>
-        <button onClick={() => handleAddHours(10)} className="btn-dev">
-          <Plus size={13} /> +10 Hrs
-        </button>
-        <button onClick={() => handleAddHours(50)} className="btn-dev">
-          <Plus size={13} /> +50 Hrs
-        </button>
-        <button onClick={handleReset} className="btn-dev danger">
-          <RotateCcw size={13} /> Reset
-        </button>
-      </div>
-
-      {/* Tier Roadmap Grid */}
-      <div className="rank-roadmap-section">
-        <h3>All Ranks & Duration Thresholds</h3>
-        <div className="rank-roadmap-grid">
-          {RANK_TIERS.map((tier) => {
-            const isUnlocked = hours >= tier.requiredHours;
-            const isCurrent = tier.id === currentRank.id;
-
-            return (
-              <div
-                key={tier.id}
-                className={`roadmap-card ${isCurrent ? 'current' : isUnlocked ? 'unlocked' : 'locked'}`}
-                style={{ '--tier-color': tier.badgeColor } as React.CSSProperties}
-              >
-                <div className="roadmap-card-header">
-                  <div
-                    className="roadmap-badge-icon"
-                    style={{ background: tier.badgeGradient }}
-                  >
-                    {isUnlocked ? <CheckCircle2 size={14} color="#FFF" /> : <Lock size={14} color="#FFF" />}
-                  </div>
-                  <span className="roadmap-card-name">{tier.name}</span>
-                </div>
-
-                <div className="roadmap-card-hours">
-                  {tier.requiredHours} Total Hours
-                </div>
-
-                {isCurrent && <span className="roadmap-current-tag">ACTIVE</span>}
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>
