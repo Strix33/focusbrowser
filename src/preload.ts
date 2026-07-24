@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveNoteImage: (fileBuffer: ArrayBuffer, fileName: string) => ipcRenderer.invoke('save-note-image', fileBuffer, fileName),
   getConfig: () => ipcRenderer.invoke('get-config'),
   saveConfig: (config: any) => ipcRenderer.invoke('save-config', config),
+  getRankVideoUrl: (fileName: string) => ipcRenderer.invoke('get-rank-video-url', fileName),
   onGlobalAskAi: (callback: () => void) => {
     const listener = () => callback();
     ipcRenderer.on('global-ask-ai', listener);

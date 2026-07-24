@@ -1,16 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, ArrowRight, RotateCw, Globe, Search, BookOpen, Sparkles, Settings, X, Shield } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCw, Globe, Search, BookOpen, Sparkles, Settings, X, Shield, Trophy, Award, Flame } from 'lucide-react';
 import NotesTab from './components/NotesTab';
 import AskAiTab from './components/AskAiTab';
 import SettingsTab from './components/SettingsTab';
+import RankTab from './components/RankTab';
 import CropOverlay from './components/CropOverlay';
 import type { ApiKeys } from './utils/ai-providers';
+import { getRankProgressInfo, formatStudyTime } from './utils/rank-system';
+import { classifyContent, ClassificationResult } from './utils/content-classifier';
 
-type PanelType = 'notes' | 'ai' | 'settings';
+type PanelType = 'notes' | 'ai' | 'settings' | 'rank';
 
 export default function App() {
   const [activePanel, setActivePanel] = useState<PanelType | null>(null);
   const [blockedKeywords, setBlockedKeywords] = useState<string[]>([]);
+  const [totalStudySeconds, setTotalStudySeconds] = useState<number>(0);
+  const [currentClassification, setCurrentClassification] = useState<ClassificationResult | null>(null);
   const [apiKeys, setApiKeys] = useState<ApiKeys>(() => {
     // Migrate old single key if present
     const oldKey = localStorage.getItem('gemini_api_key');
@@ -45,6 +50,13 @@ export default function App() {
         if (config) {
           if (config.blockedKeywords) setBlockedKeywords(config.blockedKeywords);
           if (config.defaultAiProvider) setDefaultAiProvider(config.defaultAiProvider);
+          if (typeof config.totalStudySeconds === 'number') {
+            setTotalStudySeconds(config.totalStudySeconds);
+          } else {
+            // Check fallback in localStorage
+            const savedSec = localStorage.getItem('focusbro_total_study_seconds');
+            if (savedSec) setTotalStudySeconds(parseInt(savedSec, 10));
+          }
         }
       }
     }
@@ -69,7 +81,6 @@ export default function App() {
 
         if (selectedText && selectedText.trim().length > 0) {
           // === TEXT MODE ===
-          // User has text selected → copy it to clipboard and open AI to paste
           console.log('[FocusBro] Text selected, copying to clipboard:', selectedText.substring(0, 50) + '...');
           try {
             if (window.electronAPI) {
@@ -80,16 +91,13 @@ export default function App() {
           } catch (err) {
             console.error('[FocusBro] Failed to write text to clipboard:', err);
           }
-          // Open the AI panel and trigger auto-paste
           setActivePanel('ai');
-          // Small delay to let the AI panel mount its webview before pasting
           setTimeout(() => {
             setScreenshotTriggerTime(Date.now());
             setFocusAskAiInput(prev => prev + 1);
           }, 300);
         } else {
           // === IMAGE MODE ===
-          // No text selected → capture a screenshot of the page
           console.log('[FocusBro] No text selected, capturing screenshot...');
           if (webview) {
             try {
@@ -97,12 +105,10 @@ export default function App() {
               setCropImage(image.toDataURL());
             } catch (err) {
               console.error('[FocusBro] Failed to capture page:', err);
-              // Fallback: just open AI panel
               setActivePanel('ai');
               setFocusAskAiInput(prev => prev + 1);
             }
           } else {
-            // No webview available, just open AI panel
             setActivePanel('ai');
             setFocusAskAiInput(prev => prev + 1);
           }
@@ -114,6 +120,46 @@ export default function App() {
       };
     }
   }, []);
+
+  // Real-time active study tracker (1s interval)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const webview = webviewRef.current;
+      if (!webview) return;
+
+      try {
+        const currentUrl = webview.getURL() || urlInput;
+        const currentTitle = webview.getTitle() || '';
+
+        const classification = classifyContent(currentUrl, currentTitle);
+        setCurrentClassification(classification);
+
+        if (classification.isStudy) {
+          setTotalStudySeconds(prev => {
+            const nextSec = prev + 1;
+            // Save to localStorage immediately as fast backup
+            localStorage.setItem('focusbro_total_study_seconds', nextSec.toString());
+            return nextSec;
+          });
+        }
+      } catch (err) {
+        // Ignore iframe/webview load errors
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [urlInput]);
+
+  // Periodic persist of study seconds to Electron config file (every 10s)
+  useEffect(() => {
+    const saveInterval = setInterval(() => {
+      if (window.electronAPI) {
+        window.electronAPI.saveConfig({ totalStudySeconds });
+      }
+    }, 10000);
+
+    return () => clearInterval(saveInterval);
+  }, [totalStudySeconds]);
 
   // Webview event bindings
   useEffect(() => {
@@ -150,7 +196,7 @@ export default function App() {
     let url = targetUrl.trim();
     if (!url) return;
 
-    const isUrl = /^(https?:\/\/)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w .-]*)*\/?$/.test(url);
+    const isUrl = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(url);
     if (!isUrl) {
       url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
     } else if (!/^https?:\/\//i.test(url)) {
@@ -189,7 +235,25 @@ export default function App() {
     localStorage.setItem('api_key_anthropic', keys.anthropic);
   };
 
-  const panelTitle = activePanel === 'notes' ? 'Notes' : activePanel === 'ai' ? 'Ask AI' : 'Settings';
+  const handleUpdateStudySeconds = (newSeconds: number) => {
+    setTotalStudySeconds(newSeconds);
+    localStorage.setItem('focusbro_total_study_seconds', newSeconds.toString());
+    if (window.electronAPI) {
+      window.electronAPI.saveConfig({ totalStudySeconds: newSeconds });
+    }
+  };
+
+  const hours = totalStudySeconds / 3600;
+  const rankInfo = getRankProgressInfo(hours);
+
+  const panelTitle =
+    activePanel === 'notes'
+      ? 'Notes'
+      : activePanel === 'ai'
+      ? 'Ask AI'
+      : activePanel === 'rank'
+      ? 'Rank Progression'
+      : 'Settings';
 
   return (
     <div className="app-container">
@@ -247,8 +311,42 @@ export default function App() {
           {isLoading && <div className="url-loading-bar" />}
         </div>
 
+        {/* Topbar Mini Rank Badge */}
+        <button
+          className={`mini-rank-pill ${activePanel === 'rank' ? 'active' : ''}`}
+          onClick={() => togglePanel('rank')}
+          title="Click to view Rank Progression"
+          style={{ '--pill-color': rankInfo.currentRank.badgeColor } as React.CSSProperties}
+        >
+          <div className="mini-rank-icon" style={{ background: rankInfo.currentRank.badgeGradient }}>
+            <Trophy size={11} color="#FFF" />
+          </div>
+          <div className="mini-rank-info">
+            <span className="mini-rank-name">{rankInfo.currentRank.name}</span>
+            <div className="mini-rank-progress-track">
+              <div
+                className="mini-rank-progress-fill"
+                style={{
+                  width: `${rankInfo.progressPercent}%`,
+                  background: rankInfo.currentRank.badgeGradient
+                }}
+              />
+            </div>
+          </div>
+          {currentClassification?.isStudy && (
+            <span className="mini-rank-active-dot" title="Study Session Active (+XP)" />
+          )}
+        </button>
+
         {/* Feature Icons */}
         <div className="toolbar-features">
+          <button
+            className={activePanel === 'rank' ? 'active' : ''}
+            onClick={() => togglePanel('rank')}
+            data-tooltip="Rank System"
+          >
+            <Trophy size={15} color={activePanel === 'rank' ? rankInfo.currentRank.badgeColor : undefined} />
+          </button>
           <button
             className={activePanel === 'notes' ? 'active' : ''}
             onClick={() => togglePanel('notes')}
@@ -294,7 +392,6 @@ export default function App() {
             imageUrl={cropImage}
             onCancel={() => setCropImage(null)}
             onCropComplete={async (croppedDataUrl) => {
-              // Write image to system clipboard via main process IPC (reliable)
               try {
                 if (window.electronAPI) {
                   await window.electronAPI.writeImageToClipboard(croppedDataUrl);
@@ -303,10 +400,8 @@ export default function App() {
               } catch (err) {
                 console.error('[FocusBro] Failed to write cropped image to clipboard:', err);
               }
-              // Close crop overlay and open AI panel
               setCropImage(null);
               setActivePanel('ai');
-              // Delay paste trigger to let AI panel & webview mount
               setTimeout(() => {
                 setScreenshotTriggerTime(Date.now());
                 setFocusAskAiInput(prev => prev + 1);
@@ -319,7 +414,7 @@ export default function App() {
         {activePanel && (
           <>
             <div className="panel-backdrop" onClick={() => setActivePanel(null)} />
-            <div className="floating-panel">
+            <div className={`floating-panel ${activePanel === 'rank' ? 'wide-panel' : ''}`}>
               <div className="panel-header">
                 <h3>{panelTitle}</h3>
                 <button onClick={() => setActivePanel(null)}>
@@ -327,6 +422,16 @@ export default function App() {
                 </button>
               </div>
               <div className="panel-content">
+                {activePanel === 'rank' && (
+                  <div className="animate-fade-in" style={{ height: '100%' }}>
+                    <RankTab
+                      totalStudySeconds={totalStudySeconds}
+                      onUpdateStudySeconds={handleUpdateStudySeconds}
+                      currentClassification={currentClassification}
+                      currentTitle={webviewRef.current?.getTitle() || ''}
+                    />
+                  </div>
+                )}
                 {activePanel === 'notes' && (
                   <div className="animate-fade-in" style={{ height: '100%' }}>
                     <NotesTab geminiKey={apiKeys.gemini} />

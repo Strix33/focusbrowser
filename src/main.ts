@@ -30,7 +30,8 @@ if (!fs.existsSync(notesImagesDir)) {
 // In-memory config store
 let appConfig = {
   blockedKeywords: [] as string[],
-  defaultAiProvider: ''
+  defaultAiProvider: '',
+  totalStudySeconds: 0
 };
 
 // Load config
@@ -665,4 +666,24 @@ ipcMain.handle('write-text-to-clipboard', (event, text: string) => {
     console.error('Error writing text to clipboard:', err);
     return false;
   }
+});
+
+// Resolve rank video file path from rank system directory
+ipcMain.handle('get-rank-video-url', (event, fileName: string) => {
+  try {
+    const candidates = [
+      path.join(process.cwd(), 'rank system', fileName),
+      path.join(app.getAppPath(), 'rank system', fileName),
+      path.join(process.cwd(), 'rank system', 'iron.mp4'),
+      path.join(app.getAppPath(), 'rank system', 'iron.mp4'),
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        return `focusbro-file://${p.replace(/\\/g, '/')}`;
+      }
+    }
+  } catch (err) {
+    console.error('Error getting rank video url:', err);
+  }
+  return null;
 });

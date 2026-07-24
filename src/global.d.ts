@@ -8,8 +8,9 @@ interface ElectronAPI {
   getNotes: () => Promise<any[]>;
   saveNotes: (notes: any[]) => Promise<boolean>;
   saveNoteImage: (fileBuffer: ArrayBuffer, fileName: string) => Promise<string | null>;
-  getConfig: () => Promise<{ blockedKeywords: string[]; defaultAiProvider?: string }>;
-  saveConfig: (config: { blockedKeywords?: string[]; defaultAiProvider?: string }) => Promise<boolean>;
+  getConfig: () => Promise<{ blockedKeywords: string[]; defaultAiProvider?: string; totalStudySeconds?: number }>;
+  saveConfig: (config: { blockedKeywords?: string[]; defaultAiProvider?: string; totalStudySeconds?: number }) => Promise<boolean>;
+  getRankVideoUrl: (fileName: string) => Promise<string | null>;
   onGlobalAskAi: (callback: () => void) => () => void;
   writeImageToClipboard: (dataUrl: string) => Promise<boolean>;
   writeTextToClipboard: (text: string) => Promise<boolean>;

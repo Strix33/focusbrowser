@@ -407,3 +407,424 @@ body {
   opacity: 1;
   transform: translateX(-50%) scale(1);
 }
+
+/* ===== Wide Panel (for Rank Tab) ===== */
+.floating-panel.wide-panel {
+  width: 680px;
+  max-width: 92vw;
+}
+
+/* ===== Mini Rank Pill in Toolbar ===== */
+.mini-rank-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-right: 8px;
+  flex-shrink: 0;
+  outline: none;
+}
+.mini-rank-pill:hover, .mini-rank-pill.active {
+  background: var(--bg-surface-hover);
+  border-color: var(--pill-color, var(--color-primary));
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+.mini-rank-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mini-rank-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.mini-rank-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+  letter-spacing: -0.1px;
+}
+.mini-rank-progress-track {
+  width: 48px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.mini-rank-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.mini-rank-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 6px #10B981;
+  animation: pulseGreen 1.5s infinite;
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* ===== Rank Tab Component Styles ===== */
+.rank-tab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  color: var(--color-text);
+}
+
+.rank-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rank-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rank-header-icon {
+  color: #F59E0B;
+}
+.rank-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+.rank-subtitle {
+  font-size: 12px;
+  color: var(--color-text-dim);
+  margin: 2px 0 0 0;
+}
+
+/* Status Banner */
+.rank-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--bg-surface);
+  transition: all var(--transition-fast);
+}
+.rank-status-banner.active {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.06);
+}
+.rank-status-banner.idle {
+  border-color: var(--color-border);
+  background: var(--bg-surface);
+}
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.status-dot.pulse-green {
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+  animation: pulseGreen 1.5s infinite;
+}
+.status-dot.dim {
+  background: var(--color-text-dim);
+}
+.status-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+.rank-status-banner.active .status-label {
+  color: #34D399;
+}
+.rank-status-banner.idle .status-label {
+  color: var(--color-text-dim);
+}
+.status-details {
+  font-size: 12px;
+}
+.status-reason {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+}
+.status-reason.dim {
+  color: var(--color-text-dim);
+}
+
+/* Hero Rank Card */
+.rank-hero-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  background: #0D0F14;
+}
+.rank-video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background: #000;
+}
+.rank-bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rank-video-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.9) 100%);
+}
+.rank-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(13, 15, 20, 0.2) 0%, rgba(13, 15, 20, 0.9) 80%, #0D0F14 100%);
+}
+
+.rank-hero-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 2;
+}
+
+.rank-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #FFF;
+  width: fit-content;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.rank-tier-title {
+  font-size: 32px;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  line-height: 1.1;
+}
+
+.rank-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFF;
+}
+
+/* Progress Section */
+.rank-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.progress-bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.rank-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.rank-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+.progress-bar-footer {
+  font-size: 11px;
+  color: var(--color-text-dim);
+}
+.max-rank-text {
+  color: #F59E0B;
+  font-weight: 700;
+}
+
+/* Dev Controls */
+.rank-dev-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+  flex-wrap: wrap;
+}
+.dev-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-dim);
+  margin-right: 4px;
+}
+.btn-dev {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--bg-surface-hover);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-dev:hover {
+  background: var(--color-primary);
+  color: #FFF;
+  border-color: var(--color-primary);
+}
+.btn-dev.danger:hover {
+  background: #EF4444;
+  color: #FFF;
+  border-color: #EF4444;
+}
+
+/* Roadmap Grid */
+.rank-roadmap-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.rank-roadmap-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text);
+}
+.rank-roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+.roadmap-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--bg-surface);
+  transition: all var(--transition-fast);
+}
+.roadmap-card.unlocked {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.roadmap-card.current {
+  border-color: var(--tier-color, var(--color-primary));
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+.roadmap-card.locked {
+  opacity: 0.5;
+}
+
+.roadmap-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.roadmap-badge-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.roadmap-card-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.roadmap-card-hours {
+  font-size: 11px;
+  color: var(--color-text-dim);
+}
+.roadmap-current-tag {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--tier-color, #FFF);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
